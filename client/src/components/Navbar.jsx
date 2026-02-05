@@ -1,77 +1,84 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const Navbar = () => {
-  const [theme, setTheme] = useState("");
+const NavBar = () => {
+  const [theme, setTheme] = useState("light");
   const navigate = useNavigate();
 
   const handleThemeChange = (event) => {
-    setTheme(event.target.value);
-    localStorage.setItem("chatKaroTheme", event.target.value);
-    document.documentElement.setAttribute("data-theme", event.target.value);
+    const selectedTheme = event.target.value;
+    setTheme(selectedTheme);
+    localStorage.setItem("chit-chatTheme", selectedTheme);
+    document.documentElement.setAttribute("data-theme", selectedTheme);
   };
 
   useEffect(() => {
-    const currentTheme = localStorage.getItem("chatKaroTheme");
-    document.documentElement.setAttribute("data-theme", currentTheme);
-    setTheme(currentTheme);
+    const savedTheme = localStorage.getItem("chit-chatTheme") || "light";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+    setTheme(savedTheme);
   }, []);
 
   return (
-    <div className="bg-primary flex justify-between px-5 py-2">
-      <h1>ChatKaro</h1>
+    <nav className="bg-primary px-6 py-3 shadow-md">
+      <div className="flex items-center justify-between max-w-7xl mx-auto">
+        {/* Logo */}
+        <h1 className="text-2xl font-extrabold tracking-wide cursor-pointer">
+          Data-Transfer
+        </h1>
 
-      <div>
-        <span>Home</span>
-        <span>About</span>
+        {/* Links */}
+        <div className="hidden md:flex gap-6 text-sm font-medium">
+          <span className="cursor-pointer hover:text-secondary transition">
+            Home
+          </span>
+          <span className="cursor-pointer hover:text-secondary transition">
+            About
+          </span>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-3">
+          <button
+            className="btn btn-secondary btn-sm px-5"
+            onClick={() => navigate("/login")}
+          >
+            Login
+          </button>
+
+          <button
+            className="btn btn-outline btn-sm px-5"
+            onClick={() => navigate("/register")}
+          >
+            Register
+          </button>
+
+          <select
+            className="select select-bordered select-sm min-w-[130px]"
+            onChange={handleThemeChange}
+            value={theme}
+          >
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+            <option value="claude">Claude</option>
+            <option value="spotify">Spotify</option>
+            <option value="vscode">VSCode</option>
+            <option value="black">Black</option>
+            <option value="corporate">Corporate</option>
+            <option value="ghibli">Ghibli</option>
+            <option value="gourmet">Gourmet</option>
+            <option value="luxury">Luxury</option>
+            <option value="mintlify">Mintlify</option>
+            <option value="pastel">Pastel</option>
+            <option value="perplexity">Perplexity</option>
+            <option value="shadcn">Shadcn</option>
+            <option value="slack">Slack</option>
+            <option value="soft">Soft</option>
+            <option value="valorant">Valorant</option>
+          </select>
+        </div>
       </div>
-
-      <div className="flex gap-3">
-      
-        <button
-          className="btn btn-secondary"
-          onClick={() => navigate("/")}
-        >
-          Login
-        </button>
-
-      
-        <button
-          className="btn btn-accent"
-          onClick={() => navigate("/register")}
-        >
-          Register
-        </button>
-
-        <select
-          name="theme"
-          id="theme"
-          className="select"
-          onChange={handleThemeChange}
-          value={theme}
-        >
-          <option value="">Default</option>
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-          <option value="claude">Claude</option>
-          <option value="spotify">Spotify</option>
-          <option value="vscode">VSCode</option>
-          <option value="black">Black</option>
-          <option value="corporate">Corporate</option>
-          <option value="ghibli">Ghibli</option>
-          <option value="gourmet">Gourmet</option>
-          <option value="luxury">Luxury</option>
-          <option value="mintlify">Mintlify</option>
-          <option value="pastel">Pastel</option>
-          <option value="perplexity">Perplexity</option>
-          <option value="shadcn">Shadcn</option>
-          <option value="slack">Slack</option>
-          <option value="soft">Soft</option>
-          <option value="valorant">Valorant</option>
-        </select>
-      </div>
-    </div>
+    </nav>
   );
 };
 
-export default Navbar;
+export default NavBar;

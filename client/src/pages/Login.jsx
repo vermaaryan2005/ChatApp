@@ -2,16 +2,33 @@ import React, { useState } from "react";
 import toast from "react-hot-toast";
 import api from "../config/Api";
 import { useNavigate } from "react-router-dom";
+import { useGoogleAuth } from "../config/GoogleAuth";
+import { FaGoogle } from "react-icons/fa";
 
 const Login = () => {
   const navigate = useNavigate();
+
+  const { isLoading, error, isInitialized, signInWithGoogle } = useGoogleAuth();
+
+  const handleGoogleSuccess = async (userData) => {
+    console.log("Google Login Data", userData);
+  };
+
+  const GoogleLogin = () => {
+    signInWithGoogle(handleGoogleSuccess, handleGoogleFailure);
+  };
+
+  const handleGoogleFailure = (error) => {
+    console.error("Google login failed:", error);
+    toast.error("Google login failed. Please try again.");
+  };
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [Loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,67 +41,121 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    setLoading(true);
 
     try {
       const res = await api.post("/auth/login", formData);
+
       toast.success(res.data.message);
+
+      // optional: store user or token
+      sessionStorage.setItem("AppUser", JSON.stringify(res.data.data));
+
       handleClearForm();
-      navigate("/home");
+
+      // simple redirect
+      navigate("/dashboard");
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Login Failed");
+      console.log(error);
+      toast.error(error?.response?.data?.message || "Login failed");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-base-200">
+    <div className="min-h-screen flex items-center justify-center bg-base-200 px-4">
+      <div className="w-full max-w-md">
+        <div className="card bg-base-100 shadow-xl">
+          <div className="card-body">
+            {/* Header */}
+            <h2 className="card-title text-3xl justify-center text-primary">
+              Login
+            </h2>
+            <p className="text-center text-base-content/70 mb-6">
+              Welcome back 👋
+            </p>
 
-      <div className="card w-full max-w-md bg-base-100 shadow-xl">
-        <div className="card-body">
-
-          <h2 className="text-3xl font-bold text-center">Login</h2>
-
-          <form onSubmit={handleSubmit} onReset={handleClearForm}>
-
-            <div className="form-control mb-4">
+            {/* Form */}
+            <form
+              onSubmit={handleSubmit}
+              onReset={handleClearForm}
+              className="space-y-4"
+            >
               <input
                 type="email"
                 name="email"
-                placeholder="Email"
+                placeholder="Email address"
                 value={formData.email}
                 onChange={handleChange}
-                className="input input-bordered"
+                disabled={Loading}
+                required
+                className="input input-bordered w-full"
               />
-            </div>
 
-            <div className="form-control mb-4">
               <input
                 type="password"
                 name="password"
                 placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
-                className="input input-bordered"
+                disabled={Loading}
+                required
+                className="input input-bordered w-full"
               />
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="reset"
+                  disabled={Loading}
+                  className="btn btn-secondary btn-outline flex-1"
+                >
+                  Clear
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={Loading}
+                  className="btn btn-primary flex-1"
+                >
+                  {Loading ? "Logging in..." : "Login"}
+                </button>
+              </div>
+            </form>
+
+            {/* Google Login button */}
+
+            <div className="mt-4">
+              {error ? (
+                <button
+                  className="btn btn-outline btn-error font-sans flex items-center justify-center gap-2 w-full"
+                  disabled
+                >
+                  <FaGoogle className="text-xl" />
+                  {error}
+                </button>
+              ) : (
+                <button
+                  onClick={GoogleLogin}
+                  className="btn btn-outline font-sans flex items-center justify-center gap-2 w-full"
+                  disabled={!isInitialized || isLoading}
+                >
+                  <FaGoogle className="text-xl" />
+                  {isLoading
+                    ? "Loading..."
+                    : isInitialized
+                      ? "Continue with Google"
+                      : "Google Auth Error"}
+                </button>
+              )}
             </div>
-
-            <div className="flex gap-3">
-              <button type="reset" className="btn btn-outline w-1/2">
-                Clear
-              </button>
-
-              <button type="submit" className="btn btn-primary w-1/2">
-                {isLoading ? "Loading..." : "Login"}
-              </button>
-            </div>
-
-          </form>
-
+          </div>
         </div>
-      </div>
 
+        <p className="text-center text-sm text-base-content/60 mt-6">
+          Your data is safe with us 🔐
+        </p>
+      </div>
     </div>
   );
 };
